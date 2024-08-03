@@ -44,9 +44,9 @@ else
     
 builder.Services.AddIdentity<User, IdentityRole>(options =>
     {
-        // Configure Identity options for email
+       
         options.User.RequireUniqueEmail = true; // Ensure email addresses are unique
-        // Configure password policies, lockout settings, etc.
+       
     })
     .AddEntityFrameworkStores<HabitDb>()
     .AddDefaultTokenProviders();
@@ -61,13 +61,35 @@ builder.Services.AddSwaggerGen(c =>
         Description = "Keep track of your habits", 
         Version = "v1" 
     });
+    var securityScheme = new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "JWT Authorization header using the Bearer scheme."
+    };
+
+    c.AddSecurityDefinition("Bearer", securityScheme);
+
+    var securityRequirement = new OpenApiSecurityRequirement
+    {
+        {
+            securityScheme,
+            new string[] {}
+        }
+    };
+
+    c.AddSecurityRequirement(securityRequirement);
+
 });
 
 
 var app = builder.Build();
 
 
-// Configure the HTTP request pipeline.
+
 if (app.Environment.IsDevelopment())
 {
    app.UseDeveloperExceptionPage();

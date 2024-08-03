@@ -41,15 +41,10 @@ namespace backend.Controllers
 
         }
 
-        // GET: api/Students/5
+        // GET: api/Habits/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Habit>> GetHabit(long id)
         {
-            var userId = _userManager.GetUserId(User);
-            if (userId == null)
-            {
-                return Unauthorized();
-            }
             var habit = await _repository.GetHabitByIdAsync(id);
 
             if (habit == null)
@@ -64,6 +59,7 @@ namespace backend.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutHabit(long id, Habit habit)
         {
+            
             if (id != habit.Id)
             {
                 return BadRequest();
@@ -71,6 +67,8 @@ namespace backend.Controllers
 
             try
             {
+                habit.UserId = _userManager.GetUserId(User);
+                habit.User = await _userManager.GetUserAsync(User);
                 await _repository.UpdateHabitAsync(habit);
             }
             catch (DbUpdateConcurrencyException)
@@ -87,12 +85,14 @@ namespace backend.Controllers
 
             return NoContent();
         }
+   
 
         // POST: api/Habits
         [HttpPost]
         public async Task<ActionResult<Habit>> PostHabit(Habit habit)
         {
-      
+            habit.UserId = _userManager.GetUserId(User);
+            habit.User = await _userManager.GetUserAsync(User);
             await _repository.AddHabitAsync(habit);
             return CreatedAtAction("GetHabit", new { id = habit.Id }, habit);
         }
@@ -101,8 +101,8 @@ namespace backend.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteHabit(long id)
         {
-            var student = await _repository.GetHabitByIdAsync(id);
-            if (student == null)
+            var habit = await _repository.GetHabitByIdAsync(id);
+            if (habit == null)
             {
                 return NotFound();
             }
@@ -121,7 +121,11 @@ namespace backend.Controllers
             {
                 return BadRequest("Habit data is required.");
             }
- 
+            foreach (Habit h in habits)
+            {
+                h.UserId = _userManager.GetUserId(User);
+                h.User = await _userManager.GetUserAsync(User);
+            }
 
             await _repository.BulkAddHabitsAsync(habits);
 

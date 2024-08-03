@@ -23,6 +23,7 @@ namespace  MyHabitTrackerApp.Repositories
             
             return await _context.Habits
                 .Where(h => h.UserId == userId)
+                .Include(h => h.User)
                 .ToListAsync();
         
         }
@@ -31,23 +32,27 @@ namespace  MyHabitTrackerApp.Repositories
             return await _context.Habits.FindAsync(id);
         
         }
+
+     
         public async Task AddHabitAsync(Habit habit){
              
             _context.Habits.Add(habit);
             await _context.SaveChangesAsync();
         
-        }        
+        }  
+           
         public async Task UpdateHabitAsync(Habit Habit)
          {
             _context.Entry(Habit).State = EntityState.Modified;
             await _context.SaveChangesAsync();
         }
+
         public async Task DeleteHabitAsync(long id)
          {
-            var student = await _context.Habits.FindAsync(id);
-            if (student != null)
+            var habit= await _context.Habits.FindAsync(id);
+            if (habit != null)
             {
-                _context.Habits.Remove(student);
+                _context.Habits.Remove(habit);
                 await _context.SaveChangesAsync();
             }
         }
