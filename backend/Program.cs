@@ -1,66 +1,55 @@
+using MyHabitTrackerApp.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using MyHabitTrackerApp.Context;
-using DotNetEnv;
 using MyHabitTrackerApp.Repositories;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Identity;
-using MyHabitTrackerApp.Models;
-
-
+using DotNetEnv;
 
 var builder = WebApplication.CreateBuilder(args);
-
 Env.Load();
-
 // Add services to the container.
-builder.Services.AddControllersWithViews();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddControllers()
-    .AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.PropertyNamingPolicy = null;
-        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-    });
-builder.Services.AddScoped<IHabitRepository, HabitRepository>();
-builder.Services.AddScoped<IAccountRepository, AccountRepository>();
-if (builder.Environment.IsDevelopment())
+builder.Services.AddControllers();
+
+// Configure DbContext before building the app
+var environment = builder.Environment;
+var useSqlServer = true;
+
+
+if (environment.IsDevelopment() && !useSqlServer)
 {
-    builder.Services.AddDbContext<HabitDb>(options =>
-        options.UseInMemoryDatabase("Item"));
+    builder.Services.AddDbContext<HabitContext>(options =>
+        options.UseInMemoryDatabase("Habit"));
 }
 else
-{
-    var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__HabitContext");
-    if (string.IsNullOrEmpty(connectionString))
+{   var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__HabitContext");
+     if (string.IsNullOrEmpty(connectionString))
     {
         throw new InvalidOperationException("Connection string 'HabitContext' not found.");
     }
-
-    builder.Services.AddDbContext<HabitDb>(options =>
+    builder.Services.AddDbContext<HabitContext>(options =>
         options.UseSqlServer(connectionString));
 }
-    
+
+builder.Services.AddScoped<IHabitRepository, HabitRepository>();
+builder.Services.AddScoped<IAccountRepository, AccountRepository>();
+
 builder.Services.AddIdentity<User, IdentityRole>(options =>
     {
        
         options.User.RequireUniqueEmail = true; // Ensure email addresses are unique
        
     })
-    .AddEntityFrameworkStores<HabitDb>()
+    .AddEntityFrameworkStores<HabitContext>()
     .AddDefaultTokenProviders();
 
      
 
+
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo 
-    { 
-        Title = "HabitTracker API", 
-        Description = "Keep track of your habits", 
-        Version = "v1" 
-    });
+    
     var securityScheme = new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -70,9 +59,7 @@ builder.Services.AddSwaggerGen(c =>
         In = ParameterLocation.Header,
         Description = "JWT Authorization header using the Bearer scheme."
     };
-
     c.AddSecurityDefinition("Bearer", securityScheme);
-
     var securityRequirement = new OpenApiSecurityRequirement
     {
         {
@@ -80,38 +67,18 @@ builder.Services.AddSwaggerGen(c =>
             new string[] {}
         }
     };
-
     c.AddSecurityRequirement(securityRequirement);
-
 });
 
 
 var app = builder.Build();
-
-
-
 if (app.Environment.IsDevelopment())
 {
-   app.UseDeveloperExceptionPage();
    app.UseSwagger();
-   app.UseSwaggerUI(c =>
-   {
-      c.SwaggerEndpoint("/swagger/v1/swagger.json", "HabitTracker API V1");
-   });
+   app.UseSwaggerUI();
 }
-else
-{
-    
-    app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
-    
 
-}
 app.UseHttpsRedirection();
-app.UseStaticFiles();
-
-app.UseAuthentication();
 
 app.UseAuthorization();
 

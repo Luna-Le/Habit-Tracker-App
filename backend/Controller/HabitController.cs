@@ -14,11 +14,11 @@ namespace backend.Controllers
     public class HabitController : ControllerBase
     {
         private readonly IHabitRepository _repository;
-        private readonly HabitDb _context;
+        private readonly HabitContext _context;
          private readonly UserManager<User> _userManager;
 
        
-        public HabitController(IHabitRepository repository, HabitDb context,UserManager<User> userManager  )
+        public HabitController(IHabitRepository repository, HabitContext context,UserManager<User> userManager  )
         {
             _repository = repository;
             _context = context;
