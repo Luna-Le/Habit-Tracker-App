@@ -7,9 +7,9 @@ namespace  MyHabitTrackerApp.Repositories
 {
     public class HabitRepository : IHabitRepository
     {
-        private readonly HabitDb _context;
+        private readonly HabitContext _context;
 
-        public HabitRepository(HabitDb context)
+        public HabitRepository(HabitContext context)
         {
             _context = context;
         }
