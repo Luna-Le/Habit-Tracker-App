@@ -24,7 +24,7 @@ public class Habit
     public DateTime? LastCompleted { get; set; }
     public bool IsActive { get; set; }
     //foreign key
-    public string UserId { get; set; } 
+    public string? UserId { get; set; } 
 
-    public User User { get; set; } = null!;
+    public User? User { get; set; }= null!;
 }
