@@ -13,9 +13,9 @@ builder.Services.AddControllers();
 
 // Configure DbContext before building the app
 var environment = builder.Environment;
-var useSqlServer = true;
+var useSqlServer = false;
 
-
+// database injection
 if (environment.IsDevelopment() && !useSqlServer)
 {
     builder.Services.AddDbContext<HabitContext>(options =>
@@ -50,7 +50,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     
-    var securityScheme = new OpenApiSecurityScheme
+    var securityScheme = new OpenApiSecurityScheme //allows swagger to create api in which only authenticated user can get access to their habits
     {
         Name = "Authorization",
         Type = SecuritySchemeType.Http,
@@ -77,7 +77,7 @@ if (app.Environment.IsDevelopment())
    app.UseSwagger();
    app.UseSwaggerUI();
 }
-
+app.UseRouting();
 app.UseHttpsRedirection();
 
 app.UseAuthorization();

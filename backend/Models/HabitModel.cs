@@ -1,7 +1,5 @@
-using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
-namespace MyHabitTrackerApp.Models;
 
+namespace MyHabitTrackerApp.Models;
 public enum FrequencyType
 {
     Daily,
